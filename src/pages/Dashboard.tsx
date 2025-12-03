@@ -7,6 +7,8 @@ import { BalanceCard } from '@/components/dashboard/BalanceCard';
 import { SpendingChart } from '@/components/dashboard/SpendingChart';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
 import { BudgetProgress } from '@/components/dashboard/BudgetProgress';
+import { SafeToSpend } from '@/components/dashboard/SafeToSpend';
+import { SavingsGoals } from '@/components/dashboard/SavingsGoals';
 import { AddTransactionModal } from '@/components/transactions/AddTransactionModal';
 import { Button } from '@/components/ui/button';
 import CanvasParticles from '@/components/CanvasParticles';
@@ -65,6 +67,12 @@ export default function Dashboard() {
             {/* Charts */}
             <section className="mb-8">
               <SpendingChart />
+            </section>
+
+            {/* Safe to Spend & Savings Goals */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <SafeToSpend />
+              <SavingsGoals />
             </section>
 
             {/* Recent & Budgets */}

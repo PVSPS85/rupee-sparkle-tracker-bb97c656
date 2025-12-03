@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/lib/store';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { NotificationCenter } from '@/components/dashboard/NotificationCenter';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -77,7 +78,8 @@ export function Navbar() {
           </div>
 
           {/* User section */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
             <span className="text-sm text-muted-foreground hidden sm:block">
               {user?.name}
             </span>
