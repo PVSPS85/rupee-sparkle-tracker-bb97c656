@@ -18,6 +18,24 @@ export interface Budget {
   spent: number;
 }
 
+export interface SavingsGoal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  deadline: string;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: string;
+  type: 'budget_warning' | 'budget_exceeded' | 'large_transaction' | 'goal_reached' | 'info';
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -49,6 +67,18 @@ interface AppState {
   updateBudget: (id: string, budget: Partial<Budget>) => void;
   deleteBudget: (id: string) => void;
   
+  // Savings Goals
+  savingsGoals: SavingsGoal[];
+  addSavingsGoal: (goal: Omit<SavingsGoal, 'id' | 'currentAmount' | 'createdAt'>) => void;
+  updateSavingsGoal: (id: string, goal: Partial<SavingsGoal>) => void;
+  deleteSavingsGoal: (id: string) => void;
+  
+  // Notifications
+  notifications: Notification[];
+  addNotification: (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => void;
+  markNotificationRead: (id: string) => void;
+  clearNotifications: () => void;
+  
   // Settings
   settings: AppSettings;
   updateSettings: (settings: Partial<AppSettings>) => void;
@@ -75,6 +105,12 @@ const demoBudgets: Budget[] = [
   { id: '4', category: 'Shopping', monthlyLimit: 6000, spent: 4000 },
 ];
 
+const demoSavingsGoals: SavingsGoal[] = [
+  { id: '1', name: 'New Laptop', targetAmount: 80000, currentAmount: 45000, deadline: '2024-06-01', createdAt: '2024-01-01T09:00:00Z' },
+  { id: '2', name: 'Emergency Fund', targetAmount: 100000, currentAmount: 25000, deadline: '2024-12-31', createdAt: '2024-01-01T09:00:00Z' },
+  { id: '3', name: 'Vacation Trip', targetAmount: 50000, currentAmount: 12000, deadline: '2024-08-15', createdAt: '2024-01-01T09:00:00Z' },
+];
+
 const generateId = () => Math.random().toString(36).substring(2, 15);
 
 export const useAppStore = create<AppState>()(
@@ -92,6 +128,7 @@ export const useAppStore = create<AppState>()(
             isAuthenticated: true,
             transactions: demoTransactions,
             budgets: demoBudgets,
+            savingsGoals: demoSavingsGoals,
           });
           return true;
         }
@@ -123,6 +160,8 @@ export const useAppStore = create<AppState>()(
           isAuthenticated: false,
           transactions: [],
           budgets: [],
+          savingsGoals: [],
+          notifications: [],
         });
       },
       
@@ -195,6 +234,62 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           budgets: state.budgets.filter((b) => b.id !== id),
         }));
+      },
+      
+      // Savings Goals
+      savingsGoals: [],
+      
+      addSavingsGoal: (goal) => {
+        const newGoal: SavingsGoal = {
+          ...goal,
+          id: generateId(),
+          currentAmount: 0,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({
+          savingsGoals: [...state.savingsGoals, newGoal],
+        }));
+      },
+      
+      updateSavingsGoal: (id, updates) => {
+        set((state) => ({
+          savingsGoals: state.savingsGoals.map((g) =>
+            g.id === id ? { ...g, ...updates } : g
+          ),
+        }));
+      },
+      
+      deleteSavingsGoal: (id) => {
+        set((state) => ({
+          savingsGoals: state.savingsGoals.filter((g) => g.id !== id),
+        }));
+      },
+      
+      // Notifications
+      notifications: [],
+      
+      addNotification: (notification) => {
+        const newNotification: Notification = {
+          ...notification,
+          id: generateId(),
+          read: false,
+          createdAt: new Date().toISOString(),
+        };
+        set((state) => ({
+          notifications: [newNotification, ...state.notifications].slice(0, 50), // Keep last 50
+        }));
+      },
+      
+      markNotificationRead: (id) => {
+        set((state) => ({
+          notifications: state.notifications.map((n) =>
+            n.id === id ? { ...n, read: true } : n
+          ),
+        }));
+      },
+      
+      clearNotifications: () => {
+        set({ notifications: [] });
       },
       
       // Settings
