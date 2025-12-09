@@ -16,7 +16,7 @@ import { AddTransactionModal } from '@/components/transactions/AddTransactionMod
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import CanvasParticles from '@/components/CanvasParticles';
+import ShootingStars from '@/components/ShootingStars';
 import { useAppStore, Transaction } from '@/lib/store';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -274,7 +274,7 @@ export default function Transactions() {
 
   return (
     <div className="min-h-screen relative">
-      <CanvasParticles enabled={settings.particlesEnabled} particleCount={20} />
+      <ShootingStars enabled={settings.particlesEnabled} starCount={6} />
       <Navbar />
       
       <main className="pt-20 pb-8 px-4">

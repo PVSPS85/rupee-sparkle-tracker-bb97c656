@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, Sparkles, ArrowRight, Shield, Zap, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import CanvasParticles from '@/components/CanvasParticles';
+import ShootingStars from '@/components/ShootingStars';
 import { useAppStore } from '@/lib/store';
 import { toast } from 'sonner';
 
@@ -56,7 +56,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
-      <CanvasParticles enabled={settings.particlesEnabled} particleCount={60} />
+      <ShootingStars enabled={settings.particlesEnabled} starCount={10} />
       
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

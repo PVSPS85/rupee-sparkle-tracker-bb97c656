@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, Lock, User, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import CanvasParticles from '@/components/CanvasParticles';
+import ShootingStars from '@/components/ShootingStars';
 import { useAppStore } from '@/lib/store';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -56,7 +56,7 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
-      <CanvasParticles enabled={settings.particlesEnabled} particleCount={50} />
+      <ShootingStars enabled={settings.particlesEnabled} starCount={8} />
       
       <div className="absolute inset-0 bg-gradient-radial from-neon-pink/5 via-transparent to-transparent" />
 

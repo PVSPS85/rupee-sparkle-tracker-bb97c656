@@ -1,13 +1,14 @@
 import { motion } from 'framer-motion';
 import { 
   User, 
-  Bell, 
   Sparkles, 
   Monitor, 
   Download, 
   Trash2, 
   LogOut,
+  Sun,
   Moon,
+  Laptop,
   Eye
 } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
@@ -15,12 +16,14 @@ import { PageTransition } from '@/components/layout/PageTransition';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import CanvasParticles from '@/components/CanvasParticles';
+import ShootingStars from '@/components/ShootingStars';
 import { useAppStore } from '@/lib/store';
+import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 
 export default function Settings() {
   const { settings, updateSettings, user, logout, transactions } = useAppStore();
+  const { theme, setTheme } = useTheme();
 
   const handleExportData = () => {
     const data = {
@@ -45,9 +48,15 @@ export default function Settings() {
     }
   };
 
+  const themeOptions = [
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'system', label: 'System', icon: Laptop },
+  ] as const;
+
   return (
     <div className="min-h-screen relative">
-      <CanvasParticles enabled={settings.particlesEnabled} particleCount={20} />
+      <ShootingStars enabled={settings.particlesEnabled} starCount={6} />
       <Navbar />
       
       <main className="pt-20 pb-8 px-4">
@@ -71,8 +80,8 @@ export default function Settings() {
                 <Card variant="glass">
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-neon-cyan/10">
-                        <User className="w-5 h-5 text-neon-cyan" />
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <User className="w-5 h-5 text-primary" />
                       </div>
                       <div>
                         <CardTitle>Account</CardTitle>
@@ -103,8 +112,8 @@ export default function Settings() {
                 <Card variant="glass">
                   <CardHeader>
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-neon-pink/10">
-                        <Sparkles className="w-5 h-5 text-neon-pink" />
+                      <div className="p-2 rounded-lg bg-accent/10">
+                        <Sparkles className="w-5 h-5 text-accent" />
                       </div>
                       <div>
                         <CardTitle>Appearance</CardTitle>
@@ -113,13 +122,47 @@ export default function Settings() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    {/* Theme Selector */}
+                    <div className="p-4 rounded-lg bg-secondary/50">
+                      <div className="flex items-center gap-3 mb-4">
+                        <Sun className="w-5 h-5 text-muted-foreground" />
+                        <div>
+                          <p className="font-medium">Theme</p>
+                          <p className="text-sm text-muted-foreground">
+                            Choose your preferred color theme
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {themeOptions.map((option) => {
+                          const Icon = option.icon;
+                          const isActive = theme === option.value;
+                          return (
+                            <Button
+                              key={option.value}
+                              variant={isActive ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                setTheme(option.value);
+                                toast.success(`Theme set to ${option.label}`);
+                              }}
+                              className="flex-1 gap-2"
+                            >
+                              <Icon className="w-4 h-4" />
+                              {option.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
                       <div className="flex items-center gap-3">
                         <Eye className="w-5 h-5 text-muted-foreground" />
                         <div>
-                          <p className="font-medium">₹ Particle Effect</p>
+                          <p className="font-medium">Shooting Stars</p>
                           <p className="text-sm text-muted-foreground">
-                            Animated rupee symbols falling in background
+                            Animated stars in the background
                           </p>
                         </div>
                       </div>
@@ -127,7 +170,7 @@ export default function Settings() {
                         checked={settings.particlesEnabled}
                         onCheckedChange={(checked) => {
                           updateSettings({ particlesEnabled: checked });
-                          toast.success(checked ? 'Particles enabled' : 'Particles disabled');
+                          toast.success(checked ? 'Stars enabled' : 'Stars disabled');
                         }}
                       />
                     </div>

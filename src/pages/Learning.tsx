@@ -1,7 +1,7 @@
 import { Navbar } from '@/components/layout/Navbar';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { LearningHub } from '@/components/dashboard/LearningHub';
-import CanvasParticles from '@/components/CanvasParticles';
+import ShootingStars from '@/components/ShootingStars';
 import { useAppStore } from '@/lib/store';
 
 export default function Learning() {
@@ -9,7 +9,7 @@ export default function Learning() {
 
   return (
     <div className="min-h-screen relative">
-      <CanvasParticles enabled={settings.particlesEnabled} particleCount={40} />
+      <ShootingStars enabled={settings.particlesEnabled} starCount={6} />
       <Navbar />
       
       <main className="pt-20 pb-8 px-4">
