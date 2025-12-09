@@ -12,7 +12,6 @@ import { SavingsGoals } from '@/components/dashboard/SavingsGoals';
 import { AddTransactionModal } from '@/components/transactions/AddTransactionModal';
 import { Button } from '@/components/ui/button';
 import CanvasParticles from '@/components/CanvasParticles';
-import ScreenPets from '@/components/ScreenPets';
 import { useAppStore } from '@/lib/store';
 
 export default function Dashboard() {
@@ -22,7 +21,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen relative">
       <CanvasParticles enabled={settings.particlesEnabled} particleCount={50} />
-      <ScreenPets />
       <Navbar />
       
       <main className="pt-20 pb-8 px-4">
