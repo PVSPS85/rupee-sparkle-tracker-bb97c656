@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Sparkles, ArrowRight, Shield, Zap, TrendingUp, ArrowLeft, Loader2, KeyRound } from 'lucide-react';
+import { Mail, Sparkles, ArrowRight, Shield, Zap, TrendingUp, Loader2, CheckCircle, MailOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CanvasParticles from '@/components/CanvasParticles';
@@ -10,7 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const features = [
-  { icon: Shield, text: 'OTP-secured login', color: 'from-emerald-400 to-emerald-600' },
+  { icon: Shield, text: 'Passwordless secure login', color: 'from-emerald-400 to-emerald-600' },
   { icon: Zap, text: 'Real-time tracking', color: 'from-amber-400 to-amber-600' },
   { icon: TrendingUp, text: 'Smart insights', color: 'from-blue-400 to-blue-600' },
 ];
@@ -18,16 +18,14 @@ const features = [
 export default function Login() {
   const navigate = useNavigate();
   const { settings, login: demoLogin } = useAppStore();
-  const { sendOtp, verifyOtp } = useAuth();
+  const { sendOtp } = useAuth();
   
-  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [step, setStep] = useState<'email' | 'sent'>('email');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleSendLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setIsLoading(true);
@@ -35,10 +33,10 @@ export default function Login() {
     try {
       const result = await sendOtp(email.trim());
       if (result.success) {
-        setStep('otp');
-        toast.success('OTP sent!', { description: `Check your inbox at ${email}` });
+        setStep('sent');
+        toast.success('Magic link sent!', { description: `Check your inbox at ${email}` });
       } else {
-        toast.error('Failed to send OTP', { description: result.error });
+        toast.error('Failed to send link', { description: result.error });
       }
     } catch {
       toast.error('Something went wrong');
@@ -47,65 +45,11 @@ export default function Login() {
     }
   };
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    if (value && !/^\d$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all 6 digits entered
-    if (newOtp.every(d => d !== '') && newOtp.join('').length === 6) {
-      handleVerifyOtp(newOtp.join(''));
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleOtpPaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-    if (pasted.length === 6) {
-      const newOtp = pasted.split('');
-      setOtp(newOtp);
-      handleVerifyOtp(pasted);
-    }
-  };
-
-  const handleVerifyOtp = async (token: string) => {
-    setIsLoading(true);
-    try {
-      const result = await verifyOtp(email.trim(), token);
-      if (result.success) {
-        toast.success('Welcome!', { description: 'You are logged in securely.' });
-        navigate('/dashboard');
-      } else {
-        toast.error('Invalid OTP', { description: result.error || 'Please check and try again.' });
-        setOtp(['', '', '', '', '', '']);
-        otpRefs.current[0]?.focus();
-      }
-    } catch {
-      toast.error('Verification failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
+  const handleResend = async () => {
     setIsLoading(true);
     const result = await sendOtp(email.trim());
     if (result.success) {
-      toast.success('OTP resent!', { description: 'Check your email again.' });
+      toast.success('Link resent!', { description: 'Check your email again.' });
     } else {
       toast.error('Failed to resend', { description: result.error });
     }
@@ -170,13 +114,13 @@ export default function Login() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <h2 className="font-display text-4xl font-bold leading-tight">
-              Secure login with
+              Secure login via
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-blue to-neon-green">
-                email OTP
+                email magic link
               </span>
             </h2>
             <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
-              No passwords to remember. Just enter your email and verify with a one-time code sent to your inbox.
+              No passwords to remember. Just enter your email and click the secure link we send to your inbox.
             </p>
           </motion.div>
 
@@ -213,7 +157,7 @@ export default function Login() {
         </div>
       </motion.div>
 
-      {/* Right Side - OTP Form */}
+      {/* Right Side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
         <motion.div
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -245,10 +189,10 @@ export default function Login() {
                     </div>
                     <h1 className="font-display text-3xl font-bold text-center mb-2">Sign in</h1>
                     <p className="text-muted-foreground text-center mb-8">
-                      Enter your email to receive a one-time verification code
+                      Enter your email and we will send you a secure login link
                     </p>
 
-                    <form onSubmit={handleSendOtp} className="space-y-5">
+                    <form onSubmit={handleSendLink} className="space-y-5">
                       <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
                         <label className="block text-sm font-medium text-muted-foreground mb-2">Email Address</label>
                         <div className="relative group">
@@ -283,7 +227,7 @@ export default function Login() {
                             <Loader2 className="w-5 h-5 animate-spin" />
                           ) : (
                             <>
-                              Send OTP
+                              Send Login Link
                               <ArrowRight className="w-5 h-5 ml-2" />
                             </>
                           )}
@@ -292,74 +236,54 @@ export default function Login() {
                     </form>
                   </motion.div>
                 ) : (
-                  <motion.div key="otp-step" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                    <button
-                      onClick={() => { setStep('email'); setOtp(['', '', '', '', '', '']); }}
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+                  <motion.div key="sent-step" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+                    <motion.div
+                      className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-neon-green/20 to-neon-cyan/20 border border-neon-green/30"
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <ArrowLeft className="w-4 h-4" />
-                      Back
-                    </button>
-
-                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-neon-green/20 to-neon-cyan/20 border border-neon-green/30">
-                      <KeyRound className="w-8 h-8 text-neon-green" />
-                    </div>
-                    <h1 className="font-display text-3xl font-bold text-center mb-2">Enter OTP</h1>
+                      <MailOpen className="w-10 h-10 text-neon-green" />
+                    </motion.div>
+                    
+                    <h1 className="font-display text-2xl font-bold text-center mb-2">Check your email!</h1>
                     <p className="text-muted-foreground text-center mb-2">
-                      We sent a 6-digit code to
+                      We sent a secure login link to
                     </p>
-                    <p className="text-neon-cyan text-center font-medium mb-8">{email}</p>
-
-                    {/* OTP Input Boxes */}
-                    <div className="flex justify-center gap-3 mb-6">
-                      {otp.map((digit, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                        >
-                          <input
-                            ref={el => { otpRefs.current[index] = el; }}
-                            type="text"
-                            inputMode="numeric"
-                            maxLength={1}
-                            value={digit}
-                            onChange={(e) => handleOtpChange(index, e.target.value)}
-                            onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                            onPaste={index === 0 ? handleOtpPaste : undefined}
-                            className="w-12 h-14 text-center text-xl font-bold rounded-xl border border-white/10 bg-muted/50 focus:border-neon-cyan/50 focus:ring-2 focus:ring-neon-cyan/20 outline-none transition-all duration-300"
-                          />
-                        </motion.div>
-                      ))}
+                    <p className="text-neon-cyan text-center font-medium mb-6">{email}</p>
+                    
+                    <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border/50 mb-6">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-neon-green mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground">Open the email and <strong className="text-foreground">click the login link</strong></p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-neon-green mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground">You will be automatically logged in</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Shield className="w-5 h-5 text-neon-cyan mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground">The link expires in 1 hour for security</p>
+                      </div>
                     </div>
 
-                    {/* Verify Button */}
-                    <Button
-                      onClick={() => handleVerifyOtp(otp.join(''))}
-                      size="lg"
-                      className="w-full h-14 text-base font-semibold bg-gradient-to-r from-neon-green via-neon-cyan to-neon-green bg-[length:200%_100%] hover:bg-[position:100%_0] transition-all duration-500 rounded-xl shadow-lg shadow-neon-green/25"
-                      disabled={isLoading || otp.some(d => d === '')}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          Verify & Sign In
-                          <Shield className="w-5 h-5 ml-2" />
-                        </>
-                      )}
-                    </Button>
-
-                    {/* Resend */}
-                    <div className="text-center mt-4">
-                      <button
-                        onClick={handleResendOtp}
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="flex-1 h-12 rounded-xl border-white/10"
+                        onClick={() => { setStep('email'); }}
                         disabled={isLoading}
-                        className="text-sm text-muted-foreground hover:text-neon-cyan transition-colors"
                       >
-                        Didn't receive the code? <span className="font-medium text-neon-cyan">Resend OTP</span>
-                      </button>
+                        Change email
+                      </Button>
+                      <Button
+                        size="lg"
+                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-neon-cyan to-neon-blue"
+                        onClick={handleResend}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Resend link'}
+                      </Button>
                     </div>
                   </motion.div>
                 )}
@@ -398,7 +322,7 @@ export default function Login() {
                 transition={{ delay: 1 }}
               >
                 <Shield className="w-3.5 h-3.5 text-neon-green" />
-                <span>Secured with OTP verification • No passwords needed</span>
+                <span>Passwordless login • Secured with magic link</span>
               </motion.div>
             </div>
           </div>
